@@ -2,7 +2,9 @@
 #Reversi imports
 import random
 import sys
-
+import os
+from threading import Timer
+import time
 def drawBoard(board):
     #Prints out board that is passed. Return None.
     HLINE = '  +---+---+---+---+---+---+---+---+'
@@ -182,7 +184,7 @@ def getBoardCopy(board):
 def isOnCorner(x, y):
     return (x == 0 and y == 0) or (x == 7 and y == 0) or (x == 0 and y == 7) or (x == 7 and y == 7)
 
-def getPlayerMove(board, playerTile,cyborg):
+def getPlayerMove(board, playerTile,cyborg,timer):
     if(cyborg=='cyborg'):
         copy = getBoardCopy(board)
 
@@ -191,9 +193,21 @@ def getPlayerMove(board, playerTile,cyborg):
         return bestMove
         
     DIGITS1T08 = '1 2 3 4 5 6 7 8'.split()
+    def stop():
+        print('sorry, timeout quitting...')
+        os._exit(0)
+        
+    t = Timer(timer, stop)
+    t.start()
+    prompt = ("You have %d seconds to choose an option...\n" % timer)
+          
+        
+            
     while True:
+ 
         print('Enter your move, or type quit to end the game, or hints to turn on/off hints')
-        move = input().lower()
+        move = input(prompt).lower()
+        t.cancel()
         if move == 'quit':
             return 'quit'
         if move == 'hints':
@@ -210,11 +224,11 @@ def getPlayerMove(board, playerTile,cyborg):
     return [x,y]
             
 
-def getComputerMove(board,computerTile,strategy,depth):
+def getComputerMove(board,computerTile,strategy,dept,t):
     if(strategy == 'minimax'):
         copy = getBoardCopy(board)
 
-        bestMove = minimax(copy,computerTile,int(depth),float('-inf'),float('inf'))[1]
+        bestMove = minimax(copy,computerTile,int(depth),float('-inf'),float('inf'),t)[1]
         
         return bestMove
     else:    
@@ -247,18 +261,18 @@ def showPoints(playerTile, computerTile):
 #player here is equal to tile elsewhere
 
 
-def minimax(evalboard,player, depth,alpha,beta):
+def minimax(evalboard,player, depth,alpha,beta,t):
     print(depth)
     def value(board,alpha,beta):
         opp = opponent(player)
         newDepth = depth-1;
         #define value as opposite of us, computed recursively by applying minimax
-        value = -minimax(board[1],opp,newDepth,-beta,-alpha)[0]
+        value = -minimax(board[1],opp,newDepth,-beta,-alpha,t)[0]
 
         return value
     
     #if depth 0 just return value
-    if depth == 0:
+    if depth == 0 or time.time() > t:
         score = getPlayerScoreOfBoard(player,evalboard)
         return score,None
     #evaluate all moves by their IMPLICATION DEPTH
@@ -274,7 +288,7 @@ def minimax(evalboard,player, depth,alpha,beta):
     
     best_move=moves[0];
     for m in moves:
-        print('depth'+str(depth))
+        #print('depth'+str(depth))
         print('The move: ')
         print(m[0],m[1])
         
@@ -297,17 +311,23 @@ def getInputDepth():
  
 print('Welcome to Reversi!')
 
+
 while True:
+
     mainBoard = getNewBoard()
     resetBoard(mainBoard)
     
-    #playerTile, computerTile = enterPlayerTile()
-    #depth = getInputDepth()
+    print('Set timeout!:')
+    timer = int(input())
+    print('Set max runningtime for minimax: ')
+    t=int(input())
+    playerTile, computerTile = enterPlayerTile()
+    depth = getInputDepth()
     showHints = False
-    #turn = whoGoesFirst()
-    playerTile, computerTile=['X','O']
-    turn = 'computer'
-    depth=10000
+    turn = whoGoesFirst()
+    #playerTile, computerTile=['X','O']
+    #turn = 'computer'
+    #depth=10
     print('The '+ turn + ' will go first')
     
     while True:
@@ -320,7 +340,11 @@ while True:
                 drawBoard(mainBoard)
                 
             showPoints(playerTile,computerTile)
-            move = getPlayerMove(mainBoard, playerTile,'notcyborg')    
+         
+          
+            move = getPlayerMove(mainBoard, playerTile,'notcyborg',timer)  
+           
+              
             if move == 'quit':
                 print('Bye, thanks for playing')
                 sys.exit()
@@ -340,7 +364,7 @@ while True:
             drawBoard(mainBoard)
             showPoints(playerTile,computerTile)
             input('Press Enter to see the Computers move')
-            x,y = getComputerMove(mainBoard,computerTile,'minimax',depth)
+            x,y = getComputerMove(mainBoard,computerTile,'minimax',depth,time.time() + t)
             makeMove(mainBoard,computerTile,x,y)    
             if getValidMoves(mainBoard,playerTile) == []:
                 break
