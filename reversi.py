@@ -289,10 +289,10 @@ def minimax(evalboard,player, depth,alpha,beta,t):
     best_move=moves[0];
     for m in moves:
         #print('depth'+str(depth))
-        print('The move: ')
-        print(m[0],m[1])
+        #print('The move: ')
+        #print(m[0],m[1])
         
-        #if this move gives a better scora than beta, stop looking
+        #if alpha move gives a better scora than beta, stop looking
         #since opponent will avoid this branch 
         if alpha >= beta:
             break;
