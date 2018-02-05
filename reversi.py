@@ -210,11 +210,11 @@ def getPlayerMove(board, playerTile,cyborg):
     return [x,y]
             
 
-def getComputerMove(board,computerTile,strategy):
+def getComputerMove(board,computerTile,strategy,depth):
     if(strategy == 'minimax'):
         copy = getBoardCopy(board)
 
-        bestMove = minimax(copy,computerTile,10,float('-inf'),float('inf'))[1]
+        bestMove = minimax(copy,computerTile,int(depth),float('-inf'),float('inf'))[1]
         
         return bestMove
     else:    
@@ -248,12 +248,12 @@ def showPoints(playerTile, computerTile):
 
 
 def minimax(evalboard,player, depth,alpha,beta):
-
+    print(depth)
     def value(board,alpha,beta):
         opp = opponent(player)
         newDepth = depth-1;
         #define value as opposite of us, computed recursively by applying minimax
-        value = -minimax(board[1],opp,newDepth,-beta,alpha)[0]
+        value = -minimax(board[1],opp,newDepth,-beta,-alpha)[0]
 
         return value
     
@@ -274,9 +274,9 @@ def minimax(evalboard,player, depth,alpha,beta):
     
     best_move=moves[0];
     for m in moves:
-        #print('depth'+str(depth))
-        #print('The move: ')
-        #print(m[0],m[1])
+        print('depth'+str(depth))
+        print('The move: ')
+        print(m[0],m[1])
         
         #if this move gives a better scora than beta, stop looking
         #since opponent will avoid this branch 
@@ -290,16 +290,24 @@ def minimax(evalboard,player, depth,alpha,beta):
             alpha=newAlpha
                   
     return [alpha,best_move]
-
+def getInputDepth():
+     print('Input max search depth:')
+     depth = input()
+     return depth
+ 
 print('Welcome to Reversi!')
 
 while True:
     mainBoard = getNewBoard()
     resetBoard(mainBoard)
-    playerTile, computerTile = enterPlayerTile()
+    
+    #playerTile, computerTile = enterPlayerTile()
+    #depth = getInputDepth()
     showHints = False
-    turn = whoGoesFirst()
-   #turn = 'computer'
+    #turn = whoGoesFirst()
+    playerTile, computerTile=['X','O']
+    turn = 'computer'
+    depth=10000
     print('The '+ turn + ' will go first')
     
     while True:
@@ -332,7 +340,7 @@ while True:
             drawBoard(mainBoard)
             showPoints(playerTile,computerTile)
             input('Press Enter to see the Computers move')
-            x,y = getComputerMove(mainBoard,computerTile,'minimax')
+            x,y = getComputerMove(mainBoard,computerTile,'minimax',depth)
             makeMove(mainBoard,computerTile,x,y)    
             if getValidMoves(mainBoard,playerTile) == []:
                 break
@@ -346,15 +354,4 @@ while True:
                 
     if not playAgain():
            break
-                    
-
-def test():
-    mainBoard = getNewBoard()
-    drawBoard(mainBoard)
-    for x in range(8):
-        for y in range(8):
-            if random.randint(0, 1) == 0:
-                mainBoard[x][y]='X'
-            else:
-                mainBoard[x][y]='O'
-    drawBoard(mainBoard)
+       
