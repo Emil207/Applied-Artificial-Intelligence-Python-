@@ -188,7 +188,7 @@ def getPlayerMove(board, playerTile,cyborg,timer):
     if(cyborg=='cyborg'):
         copy = getBoardCopy(board)
 
-        bestMove = minimax(copy,playerTile,10000,float('-inf'),float('inf'))[1]
+        bestMove = minimax(copy,playerTile, int(depthplayer),float('-inf'),float('inf'), timer)[1]
         
         return bestMove
         
@@ -297,7 +297,7 @@ def minimax(evalboard,player, depth,alpha,beta,t):
         if alpha >= beta:
             break;
             
-        newAlpha = value(makeMove(evalboard,player,m[0],m[1]),alpha,beta)
+        newAlpha = value(makeMove(getBoardCopy(evalboard),player,m[0],m[1]),alpha,beta)
         if newAlpha > alpha:
             
             best_move=m
@@ -328,6 +328,7 @@ while True:
     #playerTile, computerTile=['X','O']
     #turn = 'computer'
     #depth=10
+    depthplayer = 2
     print('The '+ turn + ' will go first')
     
     while True:
